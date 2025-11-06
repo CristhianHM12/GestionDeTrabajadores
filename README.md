@@ -1,6 +1,6 @@
 # 🧰 Gestión de Trabajadores – Proyecto Final
 
-**Autor:** Cristhian Huamán  
+**Autor:** Cristhian HM 
 **Tecnologías:** ASP.NET Core MVC, Entity Framework Core, Bootstrap 5, JavaScript, SQL Server  
 
 ## 📘 Descripción
