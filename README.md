@@ -34,7 +34,7 @@ Se realizaron pruebas funcionales de:
 1. Clonar el repositorio  
 2. Configurar la cadena de conexión en `appsettings.json`  
 3. Ejecutar el script SQL incluido  
-4. Ejecutar desde Visual Studio o `dotnet run`
+4. Ejecutar desde Visual Studio o control + f5 
 
 ## 🔗 Enlaces
 - 📂 **Repositorio GitHub:** [https://github.com/cristhianhm12/GestionDeTrabajadores](https://github.com/cristhianhm12/GestionDeTrabajadores)
