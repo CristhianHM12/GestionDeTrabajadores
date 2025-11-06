@@ -1,0 +1,293 @@
+﻿@model IEnumerable<GestióndeTrabajadores.Models.Trabajador>
+
+@{
+    ViewData["Title"] = "Gestión de Trabajadores";
+}
+
+<div class="container-fluid py-4 px-5 bg-light min-vh-100">
+    <h2 class="fw-bold mb-1">Gestión de Trabajadores</h2>
+    <p class="text-muted">Administra y mantén el registro de tus empleados</p>
+
+    <!-- TARJETAS DE RESUMEN -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center p-3">
+                <h6 class="text-muted">Total</h6>
+                <h3 class="fw-bold text-dark">@Model.Count()</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center p-3 bg-success-subtle">
+                <h6 class="text-muted">Activos</h6>
+                <h3 class="fw-bold text-success">@Model.Count(t => t.Estado == "Activo")</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center p-3 bg-danger-subtle">
+                <h6 class="text-muted">Inactivos</h6>
+                <h3 class="fw-bold text-danger">@Model.Count(t => t.Estado == "Inactivo")</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 text-center p-3 bg-warning-subtle">
+                <h6 class="text-muted">Vacaciones</h6>
+                <h3 class="fw-bold text-warning">@Model.Count(t => t.Estado == "Vacaciones")</h3>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <!-- FILTROS -->
+        <div class="card shadow-sm border-0 p-3 mb-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Buscar por Nombre o DNI</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                        <input type="text" id="filtroBusqueda" class="form-control" placeholder="Buscar empleado..." />
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Filtrar por Sexo</label>
+                    <select id="filtroSexo" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Filtrar por Estado</label>
+                    <select id="filtroEstado" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                        <option value="Vacaciones">Vacaciones</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- BOTÓN AGREGAR -->
+    <div class="text-end mb-3">
+        <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#modalAgregar">
+            <i class="bi bi-plus-lg"></i> Agregar Trabajador
+        </button>
+    </div>
+
+    <!-- TABLA -->
+    <div class="table-responsive rounded shadow-sm bg-white p-3">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Foto</th>
+                    <th>Nombre Completo</th>
+                    <th>Documento</th>
+                    <th>Sexo</th>
+                    <th>Fecha Nacimiento</th>
+                    <th>Dirección</th>
+                    <th>Estado</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaTrabajadores">
+                @foreach (var t in Model)
+                {
+                    <tr data-nombre="@($"{t.Nombres} {t.Apellidos}")"
+                        data-dni="@t.NumeroDocumento"
+                        data-sexo="@t.Sexo"
+                        data-estado="@t.Estado"
+                        class="@(t.Sexo == "Masculino" ? "table-primary" : "table-warning")">
+                        <td>
+                            <img src="@(t.Foto != null ? "data:image/png;base64," + Convert.ToBase64String(t.Foto) : "/img/default-user.png")"
+                                 class="rounded-circle border" width="45" height="45" />
+                        </td>
+                        <td>@t.Nombres @t.Apellidos</td>
+                        <td>@t.TipoDocumento - @t.NumeroDocumento</td>
+                        <td>@t.Sexo</td>
+                        <td>@t.FechaNacimiento.ToString("dd/MM/yyyy")</td>
+                        <td>@t.Direccion</td>
+                        <td>
+                            <span class="badge bg-@(t.Estado == "Activo" ? "success" : t.Estado == "Inactivo" ? "danger" : "warning")">
+                                @t.Estado
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary me-2 btn-editar" data-id="@t.Id">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger btn-eliminar"
+                                    data-id="@t.Id" data-nombre="@t.Nombres @t.Apellidos">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL AGREGAR -->
+<div class="modal fade" id="modalAgregar" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">Registrar Nuevo Trabajador</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formAgregar" enctype="multipart/form-data" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombres</label>
+                            <input name="Nombres" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Apellidos</label>
+                            <input name="Apellidos" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo Documento</label>
+                            <select name="TipoDocumento" class="form-select" required>
+                                <option value="">Seleccione...</option>
+                                <option>DNI</option>
+                                <option>Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Número Documento</label>
+                            <input name="NumeroDocumento" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Sexo</label>
+                            <select name="Sexo" class="form-select" required>
+                                <option>Masculino</option>
+                                <option>Femenino</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha de Nacimiento</label>
+                            <input name="FechaNacimiento" type="date" class="form-control" required />
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Dirección</label>
+                            <input name="Direccion" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Estado</label>
+                            <select name="Estado" class="form-select" required>
+                                <option>Activo</option>
+                                <option>Inactivo</option>
+                                <option>Vacaciones</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Foto</label>
+                            <input name="FotoArchivo" type="file" class="form-control" accept="image/*" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-dark" type="submit">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal fade" id="modalEditar" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title text-dark">Editar Trabajador</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formEditar" asp-action="Edit" asp-controller="Trabajadores"  enctype="multipart/form-data" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" id="editId" />
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-4 text-center">
+                            <img id="editFotoPreview" src="/img/default-user.png" width="120" height="120" class="rounded-circle border mb-2" />
+                            <input type="file" name="FotoArchivo" id="editFoto" class="form-control mt-2" accept="image/*" />
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nombres</label>
+                                    <input type="text" name="Nombres" id="editNombres" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Apellidos</label>
+                                    <input type="text" name="Apellidos" id="editApellidos" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Documento</label>
+                                    <input type="text" name="NumeroDocumento" id="editDocumento" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Sexo</label>
+                                    <select name="Sexo" id="editSexo" class="form-select">
+                                        <option>Masculino</option>
+                                        <option>Femenino</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Fecha Nacimiento</label>
+                                    <input type="date" name="FechaNacimiento" id="editFecha" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Estado</label>
+                                    <select name="Estado" id="editEstado" class="form-select">
+                                        <option>Activo</option>
+                                        <option>Inactivo</option>
+                                        <option>Vacaciones</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Dirección</label>
+                                    <input type="text" name="Direccion" id="editDireccion" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-warning" type="submit">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ELIMINAR -->
+<div class="modal fade" id="modalEliminar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Eliminar Trabajador</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formEliminar" method="post">
+                <input type="hidden" name="id" id="deleteId" />
+                <div class="modal-body">
+                    <p>¿Seguro que deseas eliminar a <strong id="deleteNombre"></strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-danger" type="submit">Eliminar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/trabajadores.js"></script>
+}
